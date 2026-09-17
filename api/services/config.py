@@ -78,7 +78,7 @@ class Settings:
 
 def get_settings(*, validate_real: bool = True) -> Settings:
     demo_mode = _boolean("SHM_DEMO_MODE", True)
-    channels_value = os.getenv("RASPBERRY_SHAKE_CHANNELS", "ENE,ENN,ENZ")
+    channels_value = os.getenv("RASPBERRY_SHAKE_CHANNELS", "").strip() or "ENE,ENN,ENZ"
     channels = tuple(
         channel.strip().upper() for channel in channels_value.split(",") if channel.strip()
     )

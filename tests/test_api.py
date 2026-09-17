@@ -84,6 +84,20 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(settings.channels, ("ENE", "ENN", "ENZ"))
         self.assertEqual(settings.baseline_for("ENE"), 3.5)
 
+    def test_blank_channel_environment_uses_accelerometer_defaults(self) -> None:
+        from api.services.config import get_settings
+
+        with patch.dict(
+            os.environ,
+            {
+                "SHM_DEMO_MODE": "false",
+                "RASPBERRY_SHAKE_CHANNELS": "",
+            },
+            clear=True,
+        ):
+            settings = get_settings(validate_real=False)
+        self.assertEqual(settings.channels, ("ENE", "ENN", "ENZ"))
+
     def test_real_mode_allows_live_data_without_reference_values(self) -> None:
         from api.services.config import get_settings
 

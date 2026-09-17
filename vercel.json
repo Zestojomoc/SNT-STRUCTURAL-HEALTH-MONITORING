@@ -9,10 +9,6 @@
   },
   "routes": [
     {
-      "src": "/api/runtime-health",
-      "dest": "/api/runtime_health"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "/api"
     }
