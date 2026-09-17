@@ -84,6 +84,7 @@ class StatusInfo(BaseModel):
     level: Literal["normal", "attention", "warning", "unavailable"]
     label: str
     message: str
+    provisional: bool
 
 
 class WaveformPoint(BaseModel):
@@ -184,6 +185,24 @@ def monitor(
             settings.attention_change_percent,
             settings.warning_change_percent,
         )
+        provisional_status = (
+            not settings.demo_mode
+            and settings.thresholds_provisional
+            and assessment.frequency_change_percent is not None
+            and settings.attention_change_percent is not None
+            and settings.warning_change_percent is not None
+        )
+        status_label = (
+            f"Provisional {assessment.label}" if provisional_status else assessment.label
+        )
+        status_message = assessment.message
+        if provisional_status:
+            status_message = (
+                f"{assessment.message} Provisional screening limits are "
+                f"{settings.attention_change_percent:g}% absolute frequency change for "
+                f"attention and {settings.warning_change_percent:g}% for warning; this is "
+                "not an engineer-approved safety determination."
+            )
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         last_update = waveform.end_time.astimezone(timezone.utc).isoformat().replace(
             "+00:00", "Z"
@@ -224,8 +243,9 @@ def monitor(
             ),
             status=StatusInfo(
                 level=assessment.level,
-                label=assessment.label,
-                message=assessment.message,
+                label=status_label,
+                message=status_message,
+                provisional=provisional_status,
             ),
             waveform=downsample_waveform(
                 processed.acceleration_g,

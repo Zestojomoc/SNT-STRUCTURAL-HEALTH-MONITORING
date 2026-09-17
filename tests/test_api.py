@@ -35,6 +35,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(body["sensor"]["channel"], "ENZ")
         self.assertEqual(body["sensor"]["model"], "Raspberry Shake 4D")
         self.assertEqual(body["signal"]["unit"], "g")
+        self.assertFalse(body["status"]["provisional"])
         self.assertLessEqual(len(body["waveform"]), 300)
 
     def test_simulated_sensor_failure_is_friendly(self) -> None:
@@ -114,6 +115,9 @@ class ApiTests(unittest.TestCase):
         self.assertAlmostEqual(settings.baseline_for("ENN") or 0, 2.88420027)
         self.assertIsNone(settings.baseline_for("ENZ"))
         self.assertEqual(settings.modal_tracking_window_percent, 20.0)
+        self.assertTrue(settings.thresholds_provisional)
+        self.assertEqual(settings.attention_change_percent, 10.0)
+        self.assertEqual(settings.warning_change_percent, 20.0)
 
 
 if __name__ == "__main__":

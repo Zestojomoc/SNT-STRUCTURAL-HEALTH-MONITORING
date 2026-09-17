@@ -58,6 +58,7 @@ class Settings:
     reference_label: str
     attention_change_percent: float | None
     warning_change_percent: float | None
+    thresholds_provisional: bool
     filter_low_hz: float
     filter_high_hz: float
     frequency_search_low_hz: float
@@ -90,11 +91,15 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         )
         for channel in channels
     }
+    thresholds_provisional = _boolean("SHM_THRESHOLDS_PROVISIONAL", True)
+    screening_thresholds_enabled = demo_mode or thresholds_provisional
     attention = _float(
-        "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT", 5.0 if demo_mode else None
+        "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT",
+        10.0 if screening_thresholds_enabled else None,
     )
     warning = _float(
-        "SHM_WARNING_FREQUENCY_CHANGE_PERCENT", 10.0 if demo_mode else None
+        "SHM_WARNING_FREQUENCY_CHANGE_PERCENT",
+        20.0 if screening_thresholds_enabled else None,
     )
     station = os.getenv("RASPBERRY_SHAKE_STATION", "RA909").strip().upper()
 
@@ -179,6 +184,7 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         or "Bare-frame eigenvalue analysis",
         attention_change_percent=attention,
         warning_change_percent=warning,
+        thresholds_provisional=thresholds_provisional,
         filter_low_hz=filter_low,
         filter_high_hz=filter_high,
         frequency_search_low_hz=search_low,

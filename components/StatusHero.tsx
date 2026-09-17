@@ -54,6 +54,11 @@ export function StatusHero({
                 Last Known Reading
               </span>
             )}
+            {status.provisional && (
+              <span className="rounded-full border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-200">
+                Provisional thresholds
+              </span>
+            )}
           </div>
           <div className="mt-2 flex items-center gap-2.5">
             <span

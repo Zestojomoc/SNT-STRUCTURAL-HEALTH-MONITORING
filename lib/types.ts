@@ -44,6 +44,7 @@ export interface StructuralStatus {
   level: StructuralLevel;
   label: string;
   message: string;
+  provisional: boolean;
 }
 
 export interface WaveformPoint {

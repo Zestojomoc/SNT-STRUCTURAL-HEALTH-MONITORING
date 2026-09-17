@@ -22,7 +22,7 @@ Browser polling
   → Raspberry Shake FDSN (or labeled demo generator)
   → response removal + signal processing + SHM analysis
   → typed JSON
-  → responsive dashboard with a temporary bounded chart
+  → responsive dashboard with bounded in-memory chart data
 ```
 
 Each request is independent. Samples exist only inside the request and current browser state;
@@ -87,8 +87,9 @@ See [`.env.example`](.env.example). The key settings are:
 | `SHM_BASELINE_FREQUENCY_ENE_HZ` | East-West analytical reference frequency |
 | `SHM_BASELINE_FREQUENCY_ENN_HZ` | North-South analytical reference frequency |
 | `SHM_BASELINE_FREQUENCY_ENZ_HZ` | Optional vertical reference; currently unset |
-| `SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT` | Site-approved attention threshold |
-| `SHM_WARNING_FREQUENCY_CHANGE_PERCENT` | Site-approved warning threshold |
+| `SHM_THRESHOLDS_PROVISIONAL` | Marks threshold-based classifications as provisional screening results |
+| `SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT` | Provisional attention threshold: `10` percent |
+| `SHM_WARNING_FREQUENCY_CHANGE_PERCENT` | Provisional warning threshold: `20` percent |
 | `SHM_MODAL_TRACKING_WINDOW_PERCENT` | Search width around each configured modal reference (default `20`) |
 
 Do not commit `.env` or `.env.local`.
@@ -111,8 +112,9 @@ channels; `EHZ` is not mixed into acceleration calculations.
 Set `SHM_DEMO_MODE=false` to acquire real RA909 readings. The confirmed bare-frame eigenvalue
 analysis provides directional analytical references of 2.87078721 Hz for ENE/global Ux and
 2.88420027 Hz for ENN/global Uy. It does not establish an ENZ vertical reference. Frequency and
-stiffness changes are calculated per channel. Until approved condition thresholds are supplied,
-the status is marked **Thresholds Required** rather than assigning an unsupported condition.
+stiffness changes are calculated per channel. Provisional screening thresholds are 10 percent
+for attention and 20 percent for warning. Every resulting status is visibly marked **Provisional**
+until the thresholds are replaced using measured healthy-state data and engineering review.
 The service:
 
 1. requests miniSEED waveform data from the configured FDSN endpoint;
