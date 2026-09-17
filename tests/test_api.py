@@ -52,19 +52,6 @@ class ApiTests(unittest.TestCase):
             response = self.request("/api/monitor?channel=BAD")
         self.assertEqual(response.status_code, 400)
 
-    def test_real_mode_requires_station_configuration(self) -> None:
-        real_mode = {
-            "SHM_DEMO_MODE": "false",
-            "RASPBERRY_SHAKE_STATION": "",
-            "SHM_BASELINE_FREQUENCY_HZ": "",
-            "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT": "",
-            "SHM_WARNING_FREQUENCY_CHANGE_PERCENT": "",
-        }
-        with patch.dict(os.environ, real_mode, clear=True):
-            response = self.request("/api/monitor?channel=ENZ")
-        self.assertEqual(response.status_code, 503)
-        self.assertIn("not configured", response.json()["detail"])
-
     def test_ra909_is_the_default_real_station(self) -> None:
         from api.services.config import get_settings
 
@@ -92,11 +79,19 @@ class ApiTests(unittest.TestCase):
             {
                 "SHM_DEMO_MODE": "false",
                 "RASPBERRY_SHAKE_CHANNELS": "",
+                "RASPBERRY_SHAKE_BASE_URL": "",
+                "RASPBERRY_SHAKE_NETWORK": "",
+                "RASPBERRY_SHAKE_STATION": "",
+                "RASPBERRY_SHAKE_LOCATION": "",
             },
             clear=True,
         ):
-            settings = get_settings(validate_real=False)
+            settings = get_settings()
         self.assertEqual(settings.channels, ("ENE", "ENN", "ENZ"))
+        self.assertEqual(settings.base_url, "https://data.raspberryshake.org")
+        self.assertEqual(settings.network, "AM")
+        self.assertEqual(settings.station, "RA909")
+        self.assertEqual(settings.location, "00")
 
     def test_real_mode_allows_live_data_without_reference_values(self) -> None:
         from api.services.config import get_settings

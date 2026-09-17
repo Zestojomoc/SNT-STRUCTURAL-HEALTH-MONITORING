@@ -37,6 +37,11 @@ def _integer(name: str, default: int) -> int:
         raise ConfigurationError(f"{name} must be an integer") from exc
 
 
+def _text(name: str, default: str) -> str:
+    value = os.getenv(name)
+    return value.strip() if value is not None and value.strip() else default
+
+
 @dataclass(frozen=True)
 class Settings:
     demo_mode: bool
@@ -103,7 +108,7 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         "SHM_WARNING_FREQUENCY_CHANGE_PERCENT",
         20.0 if screening_thresholds_enabled else None,
     )
-    station = os.getenv("RASPBERRY_SHAKE_STATION", "RA909").strip().upper()
+    station = _text("RASPBERRY_SHAKE_STATION", "RA909").upper()
     latitude = _float("RASPBERRY_SHAKE_LATITUDE", 14.513513513513514)
     longitude = _float("RASPBERRY_SHAKE_LONGITUDE", 121.2312989577)
     if latitude is None or not -90 <= latitude <= 90:
@@ -162,19 +167,16 @@ def get_settings(*, validate_real: bool = True) -> Settings:
     return Settings(
         demo_mode=demo_mode,
         demo_fail=_boolean("SHM_DEMO_FAIL", False),
-        structure_name=os.getenv("SHM_STRUCTURE_NAME", "Monitored Structure").strip()
-        or "Monitored Structure",
+        structure_name=_text("SHM_STRUCTURE_NAME", "Monitored Structure"),
         refresh_interval_seconds=refresh,
-        base_url=os.getenv(
+        base_url=_text(
             "RASPBERRY_SHAKE_BASE_URL", "https://data.raspberryshake.org"
         ).rstrip("/"),
-        network=os.getenv("RASPBERRY_SHAKE_NETWORK", "AM").strip().upper(),
+        network=_text("RASPBERRY_SHAKE_NETWORK", "AM").upper(),
         station=station,
-        location=os.getenv("RASPBERRY_SHAKE_LOCATION", "00").strip().upper(),
-        sensor_model=os.getenv("RASPBERRY_SHAKE_MODEL", "Raspberry Shake 4D").strip()
-        or "Raspberry Shake 4D",
-        sensor_site=os.getenv("RASPBERRY_SHAKE_SITE", "Philippines").strip()
-        or "Philippines",
+        location=_text("RASPBERRY_SHAKE_LOCATION", "00").upper(),
+        sensor_model=_text("RASPBERRY_SHAKE_MODEL", "Raspberry Shake 4D"),
+        sensor_site=_text("RASPBERRY_SHAKE_SITE", "Philippines"),
         station_latitude=latitude,
         station_longitude=longitude,
         channels=channels,
@@ -186,12 +188,10 @@ def get_settings(*, validate_real: bool = True) -> Settings:
             2.0, min(float(_float("RASPBERRY_SHAKE_TIMEOUT_SECONDS", 12.0) or 12.0), 30.0)
         ),
         baseline_frequencies_hz=baseline_frequencies,
-        reference_type=os.getenv("SHM_REFERENCE_TYPE", "analytical").strip().lower()
-        or "analytical",
-        reference_label=os.getenv(
+        reference_type=_text("SHM_REFERENCE_TYPE", "analytical").lower(),
+        reference_label=_text(
             "SHM_REFERENCE_LABEL", "Bare-frame eigenvalue analysis"
-        ).strip()
-        or "Bare-frame eigenvalue analysis",
+        ),
         attention_change_percent=attention,
         warning_change_percent=warning,
         thresholds_provisional=thresholds_provisional,
