@@ -198,10 +198,8 @@ def monitor(
         status_message = assessment.message
         if provisional_status:
             status_message = (
-                f"{assessment.message} Provisional screening limits are "
-                f"{settings.attention_change_percent:g}% absolute frequency change for "
-                f"attention and {settings.warning_change_percent:g}% for warning; this is "
-                "not an engineer-approved safety determination."
+                f"{assessment.message} This provisional screening result requires validation "
+                "with measured field data and engineering review."
             )
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         last_update = waveform.end_time.astimezone(timezone.utc).isoformat().replace(
