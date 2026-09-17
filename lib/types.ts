@@ -31,6 +31,8 @@ export interface FrequencyMetrics {
   current_hz: number | null;
   baseline_hz: number | null;
   change_percent: number | null;
+  reference_type: string;
+  reference_label: string;
 }
 
 export interface StiffnessMetrics {
@@ -63,7 +65,9 @@ export interface MonitoringResponse {
 
 export interface PublicConfig {
   structure_name: string;
-  baseline_frequency_hz: number | null;
+  baseline_frequencies_hz: Record<string, number | null>;
+  reference_type: string;
+  reference_label: string;
   available_channels: string[];
   default_refresh_interval_seconds: number;
   demo_mode: boolean;

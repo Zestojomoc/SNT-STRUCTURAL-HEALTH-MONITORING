@@ -53,18 +53,24 @@ class Settings:
     waveform_duration_seconds: int
     data_delay_seconds: int
     timeout_seconds: float
-    baseline_frequency_hz: float | None
+    baseline_frequencies_hz: dict[str, float | None]
+    reference_type: str
+    reference_label: str
     attention_change_percent: float | None
     warning_change_percent: float | None
     filter_low_hz: float
     filter_high_hz: float
     frequency_search_low_hz: float
     frequency_search_high_hz: float
+    modal_tracking_window_percent: float
     waveform_points: int
 
     @property
     def station_label(self) -> str:
         return "DEMO-4D" if self.demo_mode else self.station
+
+    def baseline_for(self, channel: str) -> float | None:
+        return self.baseline_frequencies_hz.get(channel.upper())
 
 
 def get_settings(*, validate_real: bool = True) -> Settings:
@@ -76,7 +82,14 @@ def get_settings(*, validate_real: bool = True) -> Settings:
     if not channels:
         raise ConfigurationError("RASPBERRY_SHAKE_CHANNELS must include at least one channel")
 
-    baseline = _float("SHM_BASELINE_FREQUENCY_HZ", 3.5 if demo_mode else None)
+    legacy_baseline = _float("SHM_BASELINE_FREQUENCY_HZ")
+    baseline_frequencies = {
+        channel: _float(
+            f"SHM_BASELINE_FREQUENCY_{channel}_HZ",
+            legacy_baseline if legacy_baseline is not None else (3.5 if demo_mode else None),
+        )
+        for channel in channels
+    }
     attention = _float(
         "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT", 5.0 if demo_mode else None
     )
@@ -94,14 +107,14 @@ def get_settings(*, validate_real: bool = True) -> Settings:
                 "Real sensor mode requires: " + ", ".join(missing)
             )
 
-    if baseline is not None and baseline <= 0:
-        raise ConfigurationError("SHM_BASELINE_FREQUENCY_HZ must be greater than zero")
-    reference_values = (baseline, attention, warning)
-    if any(value is not None for value in reference_values) and not all(
-        value is not None for value in reference_values
-    ):
+    for channel, baseline in baseline_frequencies.items():
+        if baseline is not None and baseline <= 0:
+            raise ConfigurationError(
+                f"SHM_BASELINE_FREQUENCY_{channel}_HZ must be greater than zero"
+            )
+    if (attention is None) != (warning is None):
         raise ConfigurationError(
-            "Baseline frequency and both monitoring thresholds must be configured together"
+            "Attention and warning monitoring thresholds must be configured together"
         )
     if attention is not None and attention <= 0:
         raise ConfigurationError(
@@ -120,6 +133,14 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         raise ConfigurationError("The configured filter band is invalid")
     if not 0 < search_low < search_high:
         raise ConfigurationError("The configured frequency search band is invalid")
+    configured_tracking_window = _float("SHM_MODAL_TRACKING_WINDOW_PERCENT", 20.0)
+    tracking_window = (
+        20.0 if configured_tracking_window is None else float(configured_tracking_window)
+    )
+    if not 0 < tracking_window <= 100:
+        raise ConfigurationError(
+            "SHM_MODAL_TRACKING_WINDOW_PERCENT must be greater than zero and at most 100"
+        )
 
     refresh = _integer("DEFAULT_MONITOR_INTERVAL_SECONDS", 5)
     if refresh not in {3, 5, 10, 30}:
@@ -149,12 +170,19 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         timeout_seconds=max(
             2.0, min(float(_float("RASPBERRY_SHAKE_TIMEOUT_SECONDS", 12.0) or 12.0), 30.0)
         ),
-        baseline_frequency_hz=baseline,
+        baseline_frequencies_hz=baseline_frequencies,
+        reference_type=os.getenv("SHM_REFERENCE_TYPE", "analytical").strip().lower()
+        or "analytical",
+        reference_label=os.getenv(
+            "SHM_REFERENCE_LABEL", "Bare-frame eigenvalue analysis"
+        ).strip()
+        or "Bare-frame eigenvalue analysis",
         attention_change_percent=attention,
         warning_change_percent=warning,
         filter_low_hz=filter_low,
         filter_high_hz=filter_high,
         frequency_search_low_hz=search_low,
         frequency_search_high_hz=search_high,
+        modal_tracking_window_percent=tracking_window,
         waveform_points=max(60, min(_integer("SHM_WAVEFORM_POINTS", 180), 300)),
     )

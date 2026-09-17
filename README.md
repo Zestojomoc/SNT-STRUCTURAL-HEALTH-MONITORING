@@ -84,9 +84,12 @@ See [`.env.example`](.env.example). The key settings are:
 | `RASPBERRY_SHAKE_MODEL` | Sensor model displayed in the dashboard |
 | `RASPBERRY_SHAKE_SITE` | General installation site label |
 | `RASPBERRY_SHAKE_DATA_DELAY_SECONDS` | Source delay used for the query window |
-| `SHM_BASELINE_FREQUENCY_HZ` | Validated healthy/reference frequency, required in real mode |
+| `SHM_BASELINE_FREQUENCY_ENE_HZ` | East-West analytical reference frequency |
+| `SHM_BASELINE_FREQUENCY_ENN_HZ` | North-South analytical reference frequency |
+| `SHM_BASELINE_FREQUENCY_ENZ_HZ` | Optional vertical reference; currently unset |
 | `SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT` | Site-approved attention threshold |
 | `SHM_WARNING_FREQUENCY_CHANGE_PERCENT` | Site-approved warning threshold |
+| `SHM_MODAL_TRACKING_WINDOW_PERCENT` | Search width around each configured modal reference (default `20`) |
 
 Do not commit `.env` or `.env.local`.
 
@@ -105,11 +108,11 @@ official FDSN metadata exposes one 100 Hz velocity channel (`EHZ`) and three 100
 channels (`ENE`, `ENN`, `ENZ`). This dashboard intentionally monitors the three acceleration
 channels; `EHZ` is not mixed into acceleration calculations.
 
-Set `SHM_DEMO_MODE=false` to acquire real RA909 readings. A validated structural baseline and
-thresholds are optional for acquisition: without them, the dashboard still shows real waveform,
-acceleration, and dominant frequency, while derived comparison, stiffness, and condition fields
-are marked **Reference Required**. Configure all three reference values together after an
-approved healthy-baseline study.
+Set `SHM_DEMO_MODE=false` to acquire real RA909 readings. The confirmed bare-frame eigenvalue
+analysis provides directional analytical references of 2.87078721 Hz for ENE/global Ux and
+2.88420027 Hz for ENN/global Uy. It does not establish an ENZ vertical reference. Frequency and
+stiffness changes are calculated per channel. Until approved condition thresholds are supplied,
+the status is marked **Thresholds Required** rather than assigning an unsupported condition.
 The service:
 
 1. requests miniSEED waveform data from the configured FDSN endpoint;

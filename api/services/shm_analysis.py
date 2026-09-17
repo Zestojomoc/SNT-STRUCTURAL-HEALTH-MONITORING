@@ -38,8 +38,6 @@ def assess_structure(
         )
     if baseline_frequency_hz <= 0:
         raise ValueError("The baseline frequency must be greater than zero")
-    if attention_threshold_percent is None or warning_threshold_percent is None:
-        raise ValueError("Both monitoring thresholds are required with a baseline frequency")
 
     frequency_change = (
         (current_frequency_hz - baseline_frequency_hz) / baseline_frequency_hz
@@ -50,6 +48,14 @@ def assess_structure(
     stiffness_change = (
         (current_frequency_hz / baseline_frequency_hz) ** 2 - 1.0
     ) * 100.0
+    if attention_threshold_percent is None or warning_threshold_percent is None:
+        return StructuralAssessment(
+            frequency_change,
+            stiffness_change,
+            "unavailable",
+            "Thresholds Required",
+            "Baseline comparison is available, but approved condition thresholds are not configured.",
+        )
     magnitude = abs(frequency_change)
 
     if magnitude >= warning_threshold_percent:

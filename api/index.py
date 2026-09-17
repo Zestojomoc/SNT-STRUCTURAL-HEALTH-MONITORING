@@ -37,7 +37,9 @@ class HealthResponse(BaseModel):
 
 class PublicConfigResponse(BaseModel):
     structure_name: str
-    baseline_frequency_hz: float | None
+    baseline_frequencies_hz: dict[str, float | None]
+    reference_type: str
+    reference_label: str
     available_channels: list[str]
     default_refresh_interval_seconds: int
     demo_mode: bool
@@ -69,6 +71,8 @@ class FrequencyMetrics(BaseModel):
     current_hz: float | None
     baseline_hz: float | None
     change_percent: float | None
+    reference_type: str
+    reference_label: str
 
 
 class StiffnessMetrics(BaseModel):
@@ -128,7 +132,9 @@ def public_config(response: Response) -> PublicConfigResponse:
     settings = get_settings(validate_real=False)
     return PublicConfigResponse(
         structure_name=settings.structure_name,
-        baseline_frequency_hz=settings.baseline_frequency_hz or None,
+        baseline_frequencies_hz=settings.baseline_frequencies_hz,
+        reference_type="synthetic" if settings.demo_mode else settings.reference_type,
+        reference_label="Demo reference" if settings.demo_mode else settings.reference_label,
         available_channels=list(settings.channels),
         default_refresh_interval_seconds=settings.refresh_interval_seconds,
         demo_mode=settings.demo_mode,
@@ -149,17 +155,32 @@ def monitor(
             raise HTTPException(status_code=400, detail="Unsupported monitoring channel")
 
         waveform = fetch_waveform(settings, selected_channel)
+        channel_baseline = settings.baseline_for(selected_channel)
+        search_low_hz = settings.frequency_search_low_hz
+        search_high_hz = settings.frequency_search_high_hz
+        if channel_baseline is not None:
+            tracking_fraction = settings.modal_tracking_window_percent / 100.0
+            search_low_hz = max(
+                search_low_hz, channel_baseline * (1.0 - tracking_fraction)
+            )
+            search_high_hz = min(
+                search_high_hz, channel_baseline * (1.0 + tracking_fraction)
+            )
+            if search_low_hz >= search_high_hz:
+                raise ConfigurationError(
+                    "The modal tracking window does not overlap the frequency search band"
+                )
         processed = process_acceleration(
             waveform.samples_mps2,
             waveform.sample_rate_hz,
             filter_low_hz=settings.filter_low_hz,
             filter_high_hz=settings.filter_high_hz,
-            search_low_hz=settings.frequency_search_low_hz,
-            search_high_hz=settings.frequency_search_high_hz,
+            search_low_hz=search_low_hz,
+            search_high_hz=search_high_hz,
         )
         assessment = assess_structure(
             processed.dominant_frequency_hz,
-            settings.baseline_frequency_hz,
+            channel_baseline,
             settings.attention_change_percent,
             settings.warning_change_percent,
         )
@@ -191,8 +212,12 @@ def monitor(
             ),
             frequency=FrequencyMetrics(
                 current_hz=processed.dominant_frequency_hz,
-                baseline_hz=settings.baseline_frequency_hz,
+                baseline_hz=channel_baseline,
                 change_percent=assessment.frequency_change_percent,
+                reference_type="synthetic" if settings.demo_mode else settings.reference_type,
+                reference_label="Demo reference"
+                if settings.demo_mode
+                else settings.reference_label,
             ),
             stiffness=StiffnessMetrics(
                 estimated_change_percent=assessment.stiffness_change_percent

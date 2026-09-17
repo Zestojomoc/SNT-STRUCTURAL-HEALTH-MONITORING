@@ -44,7 +44,7 @@ def _demo_waveform(settings: Settings, channel: str) -> Waveform:
     # Slowly varying, deterministic parameters keep demo readings realistic while
     # making each accelerometer axis visually distinct.
     epoch_phase = now.timestamp() / 45.0
-    demo_baseline = settings.baseline_frequency_hz or 3.5
+    demo_baseline = settings.baseline_for(channel) or 3.5
     frequency = demo_baseline * (1.0 + 0.008 * math.sin(epoch_phase))
     amplitudes_g = (0.0014, 0.0010, 0.0018)
     amplitude_g = amplitudes_g[channel_index % len(amplitudes_g)]

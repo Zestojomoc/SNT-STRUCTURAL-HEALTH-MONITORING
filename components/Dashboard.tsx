@@ -33,7 +33,7 @@ function metricAccent(value: number | null): "default" | "positive" | "attention
 export function Dashboard() {
   const [config, setConfig] = useState<PublicConfig | null>(null);
   const [data, setData] = useState<MonitoringResponse | null>(null);
-  const [selectedChannel, setSelectedChannel] = useState(DEFAULT_CHANNELS[2]);
+  const [selectedChannel, setSelectedChannel] = useState(DEFAULT_CHANNELS[0]);
   const [refreshSeconds, setRefreshSeconds] = useState(5);
   const [paused, setPaused] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,7 +58,7 @@ export function Dashboard() {
         setSelectedChannel((current) =>
           nextConfig.available_channels.includes(current)
             ? current
-            : (nextConfig.available_channels[0] ?? DEFAULT_CHANNELS[2]),
+            : (nextConfig.available_channels[0] ?? DEFAULT_CHANNELS[0]),
         );
       })
       .catch(() => {
@@ -180,7 +180,7 @@ export function Dashboard() {
         context:
           data.frequency.baseline_hz === null
             ? "Baseline not configured"
-            : `Baseline ${formatNumber(data.frequency.baseline_hz, 2)} Hz`,
+            : `${data.frequency.reference_type === "analytical" ? "Analytical" : "Configured"} baseline ${formatNumber(data.frequency.baseline_hz, 2)} Hz`,
         icon: Waves,
         accent: "default" as const,
       },

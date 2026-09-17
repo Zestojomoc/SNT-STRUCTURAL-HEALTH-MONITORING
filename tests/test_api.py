@@ -57,7 +57,7 @@ class ApiTests(unittest.TestCase):
             "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT": "",
             "SHM_WARNING_FREQUENCY_CHANGE_PERCENT": "",
         }
-        with patch.dict(os.environ, real_mode):
+        with patch.dict(os.environ, real_mode, clear=True):
             response = self.request("/api/monitor?channel=ENZ")
         self.assertEqual(response.status_code, 503)
         self.assertIn("not configured", response.json()["detail"])
@@ -77,6 +77,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(settings.station, "RA909")
         self.assertEqual(settings.location, "00")
         self.assertEqual(settings.channels, ("ENE", "ENN", "ENZ"))
+        self.assertEqual(settings.baseline_for("ENE"), 3.5)
 
     def test_real_mode_allows_live_data_without_reference_values(self) -> None:
         from api.services.config import get_settings
@@ -86,14 +87,33 @@ class ApiTests(unittest.TestCase):
             {
                 "SHM_DEMO_MODE": "false",
                 "RASPBERRY_SHAKE_STATION": "RA909",
-                "SHM_BASELINE_FREQUENCY_HZ": "",
+                "SHM_BASELINE_FREQUENCY_ENE_HZ": "",
+                "SHM_BASELINE_FREQUENCY_ENN_HZ": "",
+                "SHM_BASELINE_FREQUENCY_ENZ_HZ": "",
                 "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT": "",
                 "SHM_WARNING_FREQUENCY_CHANGE_PERCENT": "",
             },
+            clear=True,
         ):
             settings = get_settings()
         self.assertEqual(settings.station, "RA909")
-        self.assertIsNone(settings.baseline_frequency_hz)
+        self.assertIsNone(settings.baseline_for("ENE"))
+
+    def test_confirmed_directional_analytical_baselines(self) -> None:
+        from api.services.config import get_settings
+
+        analytical = {
+            "SHM_DEMO_MODE": "false",
+            "SHM_BASELINE_FREQUENCY_ENE_HZ": "2.87078721",
+            "SHM_BASELINE_FREQUENCY_ENN_HZ": "2.88420027",
+            "SHM_BASELINE_FREQUENCY_ENZ_HZ": "",
+        }
+        with patch.dict(os.environ, analytical, clear=True):
+            settings = get_settings()
+        self.assertAlmostEqual(settings.baseline_for("ENE") or 0, 2.87078721)
+        self.assertAlmostEqual(settings.baseline_for("ENN") or 0, 2.88420027)
+        self.assertIsNone(settings.baseline_for("ENZ"))
+        self.assertEqual(settings.modal_tracking_window_percent, 20.0)
 
 
 if __name__ == "__main__":

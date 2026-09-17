@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { rmSync } from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import nextEnv from "@next/env";
 
@@ -10,6 +11,32 @@ const nextExecutable = path.join(projectRoot, "node_modules", "next", "dist", "b
 const pythonExecutable = process.platform === "win32" ? "python" : "python3";
 
 loadEnvConfig(projectRoot, true);
+
+function isPortAvailable(port) {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.once("error", (error) => {
+      if (error.code === "EADDRINUSE") resolve(false);
+      else reject(error);
+    });
+    server.listen({ host: "127.0.0.1", port }, () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
+const occupiedPorts = [];
+for (const port of [3000, 8000]) {
+  if (!(await isPortAvailable(port))) occupiedPorts.push(port);
+}
+if (occupiedPorts.length > 0) {
+  console.error(
+    `Cannot start SHM: port${occupiedPorts.length > 1 ? "s" : ""} ` +
+      `${occupiedPorts.join(", ")} ${occupiedPorts.length > 1 ? "are" : "is"} already in use. ` +
+      "Stop the previous development server with Ctrl+C, then run npm run dev again.",
+  );
+  process.exit(1);
+}
 
 // This directory contains generated development chunks only. Production builds
 // use `.next`, so the two modes cannot corrupt each other's webpack manifests.

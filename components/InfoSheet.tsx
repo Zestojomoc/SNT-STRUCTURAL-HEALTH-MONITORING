@@ -52,8 +52,9 @@ function DetailContent({ metric, data }: { metric: MetricKey; data: MonitoringRe
           />
         </dl>
         <p className="mt-5 text-sm leading-6 text-slate-400">
-          The current value is the dominant spectral peak within the configured structural
-          frequency search band, compared with the healthy reference baseline.
+          The current value is the dominant spectral peak in the tracking window around the
+          configured mode, compared with the {data.frequency.reference_type} reference:
+          {" "}{data.frequency.reference_label}.
         </p>
       </>
     );

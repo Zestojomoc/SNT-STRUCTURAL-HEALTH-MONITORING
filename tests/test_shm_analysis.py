@@ -30,6 +30,13 @@ class ShmAnalysisTests(unittest.TestCase):
         self.assertIsNone(result.frequency_change_percent)
         self.assertIsNone(result.stiffness_change_percent)
 
+    def test_baseline_without_thresholds_still_returns_derived_changes(self) -> None:
+        result = assess_structure(2.80, 2.87078721, None, None)
+        self.assertEqual(result.level, "unavailable")
+        self.assertEqual(result.label, "Thresholds Required")
+        self.assertIsNotNone(result.frequency_change_percent)
+        self.assertIsNotNone(result.stiffness_change_percent)
+
 
 if __name__ == "__main__":
     unittest.main()
