@@ -19,14 +19,14 @@ function osmEmbedUrl(latitude: number, longitude: number) {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bounds.join("%2C")}&layer=mapnik`;
 }
 
-function osmStationUrl(latitude: number, longitude: number) {
-  return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=13/${latitude}/${longitude}`;
+function stationViewUrl(latitude: number, longitude: number, station: string) {
+  return `https://stationview.raspberryshake.org/#/?lat=${latitude.toFixed(5)}&lon=${longitude.toFixed(5)}&zoom=8.888&sta=${encodeURIComponent(station)}`;
 }
 
 export function StationMap({ sensor }: { sensor: SensorInfo }) {
   const stream = `${sensor.network}.${sensor.station}.${sensor.location}`;
   const embedUrl = osmEmbedUrl(sensor.latitude, sensor.longitude);
-  const stationUrl = osmStationUrl(sensor.latitude, sensor.longitude);
+  const stationUrl = stationViewUrl(sensor.latitude, sensor.longitude, sensor.station);
 
   return (
     <section className="panel overflow-hidden rounded-2xl" aria-labelledby="station-map-title">
@@ -78,7 +78,7 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
           target="_blank"
           rel="noreferrer"
           className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-lg border border-white/[0.1] bg-slate-950/85 px-3 py-2 text-xs font-medium text-slate-200 shadow-lg backdrop-blur-md transition hover:border-sky-300/30 hover:text-sky-200 sm:top-4 sm:right-4"
-          aria-label={`Open ${sensor.station} coordinates in OpenStreetMap`}
+          aria-label={`Open ${sensor.station} in Raspberry Shake StationView`}
         >
           View full map
           <ExternalLink className="size-3.5" aria-hidden="true" />
