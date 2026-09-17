@@ -178,9 +178,10 @@ npm run test:python
 3. Add the environment variables in Project Settings.
 4. Deploy without a custom production API URL.
 
-Vercel builds the Next.js app and packages `api/index.py` as the Python function. The frontend
-always calls relative paths such as `fetch("/api/monitor")`; no production localhost dependency
-exists.
+Vercel builds the Next.js app and packages `api/index.py` as the Python function. The checked-in
+`vercel.json` explicitly includes the backend service modules and routes `/api/*` to that
+function. The frontend always calls relative paths such as `fetch("/api/monitor")`; no production
+localhost dependency exists.
 
 ## Folder structure
 
