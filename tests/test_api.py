@@ -93,7 +93,7 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(settings.station, "RA909")
         self.assertEqual(settings.location, "00")
 
-    def test_real_mode_allows_live_data_without_reference_values(self) -> None:
+    def test_real_mode_uses_confirmed_directional_reference_defaults(self) -> None:
         from api.services.config import get_settings
 
         with patch.dict(
@@ -111,7 +111,9 @@ class ApiTests(unittest.TestCase):
         ):
             settings = get_settings()
         self.assertEqual(settings.station, "RA909")
-        self.assertIsNone(settings.baseline_for("ENE"))
+        self.assertAlmostEqual(settings.baseline_for("ENE") or 0, 2.87078721)
+        self.assertAlmostEqual(settings.baseline_for("ENN") or 0, 2.88420027)
+        self.assertIsNone(settings.baseline_for("ENZ"))
 
     def test_confirmed_directional_analytical_baselines(self) -> None:
         from api.services.config import get_settings

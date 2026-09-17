@@ -10,6 +10,12 @@ class ConfigurationError(ValueError):
     """Raised when real sensor mode is missing site-specific configuration."""
 
 
+ANALYTICAL_BASELINE_FREQUENCIES_HZ = {
+    "ENE": 2.87078721,
+    "ENN": 2.88420027,
+}
+
+
 def _boolean(name: str, default: bool) -> bool:
     value = os.getenv(name)
     if value is None:
@@ -94,7 +100,13 @@ def get_settings(*, validate_real: bool = True) -> Settings:
     baseline_frequencies = {
         channel: _float(
             f"SHM_BASELINE_FREQUENCY_{channel}_HZ",
-            legacy_baseline if legacy_baseline is not None else (3.5 if demo_mode else None),
+            legacy_baseline
+            if legacy_baseline is not None
+            else (
+                3.5
+                if demo_mode
+                else ANALYTICAL_BASELINE_FREQUENCIES_HZ.get(channel)
+            ),
         )
         for channel in channels
     }
