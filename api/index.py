@@ -10,13 +10,6 @@ from fastapi import FastAPI, HTTPException, Query, Response
 from pydantic import BaseModel
 
 from api.services.config import ConfigurationError, get_settings
-from api.services.raspberry_shake import SensorUnavailableError, fetch_waveform
-from api.services.shm_analysis import assess_structure
-from api.services.signal_processing import (
-    SignalProcessingError,
-    downsample_waveform,
-    process_acceleration,
-)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -151,6 +144,27 @@ def monitor(
     channel: str | None = Query(default=None, min_length=3, max_length=3),
 ) -> MonitoringResponse:
     _no_store(response)
+    # NumPy, SciPy, and ObsPy are intentionally imported only for monitoring
+    # requests. This keeps health/config endpoints available during serverless
+    # cold starts and turns binary dependency failures into diagnosable errors.
+    try:
+        from api.services.raspberry_shake import (
+            SensorUnavailableError,
+            fetch_waveform,
+        )
+        from api.services.shm_analysis import assess_structure
+        from api.services.signal_processing import (
+            SignalProcessingError,
+            downsample_waveform,
+            process_acceleration,
+        )
+    except Exception as exc:
+        logger.exception("Monitoring dependencies failed to load")
+        raise HTTPException(
+            status_code=503,
+            detail="Monitoring processing dependencies are unavailable.",
+        ) from exc
+
     try:
         settings = get_settings(validate_real=True)
         selected_channel = (channel or settings.channels[0]).upper()
