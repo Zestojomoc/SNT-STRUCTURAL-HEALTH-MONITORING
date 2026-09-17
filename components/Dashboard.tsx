@@ -23,6 +23,7 @@ import { MonitoringControls } from "@/components/MonitoringControls";
 import { SensorDetails } from "@/components/SensorDetails";
 import { StatusHero } from "@/components/StatusHero";
 import { StatusNotice } from "@/components/StatusNotice";
+import { StationMap } from "@/components/StationMap";
 
 function metricAccent(value: number | null): "default" | "positive" | "attention" | "negative" {
   if (value === null || Math.abs(value) < 0.01) return "default";
@@ -288,6 +289,8 @@ export function Dashboard() {
                 <SensorDetails sensor={data.sensor} />
               </div>
             </div>
+
+            <StationMap sensor={data.sensor} />
 
             <InfoPanel />
           </div>

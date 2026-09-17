@@ -83,6 +83,7 @@ See [`.env.example`](.env.example). The key settings are:
 | `RASPBERRY_SHAKE_CHANNELS` | Comma-separated acceleration channels |
 | `RASPBERRY_SHAKE_MODEL` | Sensor model displayed in the dashboard |
 | `RASPBERRY_SHAKE_SITE` | General installation site label |
+| `RASPBERRY_SHAKE_LATITUDE` / `RASPBERRY_SHAKE_LONGITUDE` | Published station coordinates used by the map |
 | `RASPBERRY_SHAKE_DATA_DELAY_SECONDS` | Source delay used for the query window |
 | `SHM_BASELINE_FREQUENCY_ENE_HZ` | East-West analytical reference frequency |
 | `SHM_BASELINE_FREQUENCY_ENN_HZ` | North-South analytical reference frequency |
@@ -108,6 +109,10 @@ The configured sensor is Raspberry Shake 4D station `AM.RA909.00` in the Philipp
 official FDSN metadata exposes one 100 Hz velocity channel (`EHZ`) and three 100 Hz acceleration
 channels (`ENE`, `ENN`, `ENZ`). This dashboard intentionally monitors the three acceleration
 channels; `EHZ` is not mixed into acceleration calculations.
+
+The dashboard includes a custom, theme-matched regional schematic. RA909 is plotted from the
+coordinates published by the FDSN station service, with an animated location marker. The shared
+[Raspberry Shake StationView](https://stationview.raspberryshake.org/#/?lat=15.01299&lon=120.44889&zoom=7.803&sta=RA909) remains the external reference for the station.
 
 Set `SHM_DEMO_MODE=false` to acquire real RA909 readings. The confirmed bare-frame eigenvalue
 analysis provides directional analytical references of 2.87078721 Hz for ENE/global Ux and

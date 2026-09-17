@@ -85,6 +85,40 @@ select:focus-visible {
   }
 }
 
+@keyframes station-location-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.7);
+  }
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@keyframes station-location-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.52;
+  }
+}
+
+.station-location-pulse {
+  animation: station-location-pulse 2s ease-out infinite;
+}
+
+.station-location-pulse:nth-child(2) {
+  animation-delay: 0.65s;
+}
+
+.station-location-blink {
+  animation: station-location-blink 1.35s ease-in-out infinite;
+}
+
 .connection-pulse::after {
   content: "";
   position: absolute;

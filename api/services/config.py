@@ -49,6 +49,8 @@ class Settings:
     location: str
     sensor_model: str
     sensor_site: str
+    station_latitude: float
+    station_longitude: float
     channels: tuple[str, ...]
     waveform_duration_seconds: int
     data_delay_seconds: int
@@ -102,6 +104,12 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         20.0 if screening_thresholds_enabled else None,
     )
     station = os.getenv("RASPBERRY_SHAKE_STATION", "RA909").strip().upper()
+    latitude = _float("RASPBERRY_SHAKE_LATITUDE", 14.513513513513514)
+    longitude = _float("RASPBERRY_SHAKE_LONGITUDE", 121.2312989577)
+    if latitude is None or not -90 <= latitude <= 90:
+        raise ConfigurationError("RASPBERRY_SHAKE_LATITUDE must be between -90 and 90")
+    if longitude is None or not -180 <= longitude <= 180:
+        raise ConfigurationError("RASPBERRY_SHAKE_LONGITUDE must be between -180 and 180")
 
     if validate_real and not demo_mode:
         missing = []
@@ -167,6 +175,8 @@ def get_settings(*, validate_real: bool = True) -> Settings:
         or "Raspberry Shake 4D",
         sensor_site=os.getenv("RASPBERRY_SHAKE_SITE", "Philippines").strip()
         or "Philippines",
+        station_latitude=latitude,
+        station_longitude=longitude,
         channels=channels,
         waveform_duration_seconds=max(
             8, min(_integer("RASPBERRY_SHAKE_WAVEFORM_DURATION_SECONDS", 30), 120)

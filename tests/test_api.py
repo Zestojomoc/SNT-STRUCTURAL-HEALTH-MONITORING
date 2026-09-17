@@ -34,6 +34,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(body["mode"], "demo")
         self.assertEqual(body["sensor"]["channel"], "ENZ")
         self.assertEqual(body["sensor"]["model"], "Raspberry Shake 4D")
+        self.assertAlmostEqual(body["sensor"]["latitude"], 14.513513513513514)
+        self.assertAlmostEqual(body["sensor"]["longitude"], 121.2312989577)
         self.assertEqual(body["signal"]["unit"], "g")
         self.assertFalse(body["status"]["provisional"])
         self.assertLessEqual(len(body["waveform"]), 300)
@@ -77,6 +79,8 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(settings.network, "AM")
         self.assertEqual(settings.station, "RA909")
         self.assertEqual(settings.location, "00")
+        self.assertAlmostEqual(settings.station_latitude, 14.513513513513514)
+        self.assertAlmostEqual(settings.station_longitude, 121.2312989577)
         self.assertEqual(settings.channels, ("ENE", "ENN", "ENZ"))
         self.assertEqual(settings.baseline_for("ENE"), 3.5)
 

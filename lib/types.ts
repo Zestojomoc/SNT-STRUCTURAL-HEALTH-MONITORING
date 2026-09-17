@@ -10,6 +10,8 @@ export interface SensorInfo {
   connected: boolean;
   model: string;
   site: string;
+  latitude: number;
+  longitude: number;
   station: string;
   network: string;
   location: string;

@@ -50,6 +50,8 @@ class SensorInfo(BaseModel):
     connected: bool
     model: str
     site: str
+    latitude: float
+    longitude: float
     station: str
     network: str
     location: str
@@ -213,6 +215,8 @@ def monitor(
                 connected=True,
                 model=settings.sensor_model,
                 site=settings.sensor_site,
+                latitude=settings.station_latitude,
+                longitude=settings.station_longitude,
                 station=settings.station_label,
                 network="SIM" if settings.demo_mode else settings.network,
                 location="--" if settings.demo_mode else settings.location,
