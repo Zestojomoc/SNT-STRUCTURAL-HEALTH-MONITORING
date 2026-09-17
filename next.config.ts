@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  devIndicators: false,
   // Keep development chunks separate from production build output. This avoids
   // missing-chunk errors in cloud-synced folders such as OneDrive.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
