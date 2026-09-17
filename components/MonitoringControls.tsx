@@ -51,23 +51,27 @@ export function MonitoringControls({
         </label>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={onTogglePause}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-400 px-3 text-xs font-semibold text-slate-950 transition hover:bg-sky-300 active:scale-[0.98]"
+          aria-label={paused ? "Resume monitoring" : "Pause monitoring"}
+          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-sky-400 px-2.5 text-xs font-semibold text-slate-950 transition hover:bg-sky-300 active:scale-[0.98] sm:text-sm"
         >
-          <ToggleIcon className="size-4" aria-hidden="true" />
-          {paused ? "Resume Monitoring" : "Pause Monitoring"}
+          <ToggleIcon className="size-4 shrink-0" aria-hidden="true" />
+          {paused ? "Resume" : "Pause"}
         </button>
         <button
           type="button"
           onClick={onRefresh}
           disabled={refreshing}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/60 px-3 text-xs font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+          className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-700 bg-slate-800/60 px-2.5 text-xs font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 sm:text-sm"
         >
-          <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" />
-          {refreshing ? "Refreshing…" : "Refresh Now"}
+          <RefreshCw
+            className={`size-4 shrink-0 ${refreshing ? "animate-spin" : ""}`}
+            aria-hidden="true"
+          />
+          {refreshing ? "Refreshing…" : "Refresh now"}
         </button>
       </div>
     </section>
