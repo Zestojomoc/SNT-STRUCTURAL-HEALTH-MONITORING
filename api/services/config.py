@@ -1,0 +1,160 @@
+"""Centralized, environment-driven monitoring configuration."""
+
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+
+
+class ConfigurationError(ValueError):
+    """Raised when real sensor mode is missing site-specific configuration."""
+
+
+def _boolean(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _float(name: str, default: float | None = None) -> float | None:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise ConfigurationError(f"{name} must be a number") from exc
+
+
+def _integer(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    try:
+        return int(value)
+    except ValueError as exc:
+        raise ConfigurationError(f"{name} must be an integer") from exc
+
+
+@dataclass(frozen=True)
+class Settings:
+    demo_mode: bool
+    demo_fail: bool
+    structure_name: str
+    refresh_interval_seconds: int
+    base_url: str
+    network: str
+    station: str
+    location: str
+    sensor_model: str
+    sensor_site: str
+    channels: tuple[str, ...]
+    waveform_duration_seconds: int
+    data_delay_seconds: int
+    timeout_seconds: float
+    baseline_frequency_hz: float | None
+    attention_change_percent: float | None
+    warning_change_percent: float | None
+    filter_low_hz: float
+    filter_high_hz: float
+    frequency_search_low_hz: float
+    frequency_search_high_hz: float
+    waveform_points: int
+
+    @property
+    def station_label(self) -> str:
+        return "DEMO-4D" if self.demo_mode else self.station
+
+
+def get_settings(*, validate_real: bool = True) -> Settings:
+    demo_mode = _boolean("SHM_DEMO_MODE", True)
+    channels_value = os.getenv("RASPBERRY_SHAKE_CHANNELS", "ENE,ENN,ENZ")
+    channels = tuple(
+        channel.strip().upper() for channel in channels_value.split(",") if channel.strip()
+    )
+    if not channels:
+        raise ConfigurationError("RASPBERRY_SHAKE_CHANNELS must include at least one channel")
+
+    baseline = _float("SHM_BASELINE_FREQUENCY_HZ", 3.5 if demo_mode else None)
+    attention = _float(
+        "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT", 5.0 if demo_mode else None
+    )
+    warning = _float(
+        "SHM_WARNING_FREQUENCY_CHANGE_PERCENT", 10.0 if demo_mode else None
+    )
+    station = os.getenv("RASPBERRY_SHAKE_STATION", "RA909").strip().upper()
+
+    if validate_real and not demo_mode:
+        missing = []
+        if not station:
+            missing.append("RASPBERRY_SHAKE_STATION")
+        if missing:
+            raise ConfigurationError(
+                "Real sensor mode requires: " + ", ".join(missing)
+            )
+
+    if baseline is not None and baseline <= 0:
+        raise ConfigurationError("SHM_BASELINE_FREQUENCY_HZ must be greater than zero")
+    reference_values = (baseline, attention, warning)
+    if any(value is not None for value in reference_values) and not all(
+        value is not None for value in reference_values
+    ):
+        raise ConfigurationError(
+            "Baseline frequency and both monitoring thresholds must be configured together"
+        )
+    if attention is not None and attention <= 0:
+        raise ConfigurationError(
+            "SHM_ATTENTION_FREQUENCY_CHANGE_PERCENT must be greater than zero"
+        )
+    if warning is not None and attention is not None and warning <= attention:
+        raise ConfigurationError(
+            "SHM_WARNING_FREQUENCY_CHANGE_PERCENT must exceed the attention threshold"
+        )
+
+    filter_low = float(_float("SHM_FILTER_LOW_HZ", 0.2) or 0.2)
+    filter_high = float(_float("SHM_FILTER_HIGH_HZ", 20.0) or 20.0)
+    search_low = float(_float("SHM_FREQUENCY_SEARCH_LOW_HZ", 0.5) or 0.5)
+    search_high = float(_float("SHM_FREQUENCY_SEARCH_HIGH_HZ", 20.0) or 20.0)
+    if not 0 < filter_low < filter_high:
+        raise ConfigurationError("The configured filter band is invalid")
+    if not 0 < search_low < search_high:
+        raise ConfigurationError("The configured frequency search band is invalid")
+
+    refresh = _integer("DEFAULT_MONITOR_INTERVAL_SECONDS", 5)
+    if refresh not in {3, 5, 10, 30}:
+        refresh = 5
+
+    return Settings(
+        demo_mode=demo_mode,
+        demo_fail=_boolean("SHM_DEMO_FAIL", False),
+        structure_name=os.getenv("SHM_STRUCTURE_NAME", "Monitored Structure").strip()
+        or "Monitored Structure",
+        refresh_interval_seconds=refresh,
+        base_url=os.getenv(
+            "RASPBERRY_SHAKE_BASE_URL", "https://data.raspberryshake.org"
+        ).rstrip("/"),
+        network=os.getenv("RASPBERRY_SHAKE_NETWORK", "AM").strip().upper(),
+        station=station,
+        location=os.getenv("RASPBERRY_SHAKE_LOCATION", "00").strip().upper(),
+        sensor_model=os.getenv("RASPBERRY_SHAKE_MODEL", "Raspberry Shake 4D").strip()
+        or "Raspberry Shake 4D",
+        sensor_site=os.getenv("RASPBERRY_SHAKE_SITE", "Philippines").strip()
+        or "Philippines",
+        channels=channels,
+        waveform_duration_seconds=max(
+            8, min(_integer("RASPBERRY_SHAKE_WAVEFORM_DURATION_SECONDS", 30), 120)
+        ),
+        data_delay_seconds=max(0, _integer("RASPBERRY_SHAKE_DATA_DELAY_SECONDS", 2100)),
+        timeout_seconds=max(
+            2.0, min(float(_float("RASPBERRY_SHAKE_TIMEOUT_SECONDS", 12.0) or 12.0), 30.0)
+        ),
+        baseline_frequency_hz=baseline,
+        attention_change_percent=attention,
+        warning_change_percent=warning,
+        filter_low_hz=filter_low,
+        filter_high_hz=filter_high,
+        frequency_search_low_hz=search_low,
+        frequency_search_high_hz=search_high,
+        waveform_points=max(60, min(_integer("SHM_WAVEFORM_POINTS", 180), 300)),
+    )
