@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Structural Health Monitor",
+  title: "SNT Structural Health Monitoring",
   description: "Live structural vibration monitoring dashboard",
   robots: { index: false, follow: false },
 };

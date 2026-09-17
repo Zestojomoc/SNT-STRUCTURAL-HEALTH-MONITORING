@@ -26,8 +26,7 @@ export function Header({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="truncate text-sm font-semibold tracking-wide text-slate-100 sm:text-base">
-                <span className="sm:hidden">SHM Monitor</span>
-                <span className="hidden sm:inline">Structural Health Monitor</span>
+                SNT Structural Health Monitoring
               </h1>
               {demoMode && (
                 <span className="hidden rounded-md border border-violet-400/20 bg-violet-400/10 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-violet-200 uppercase min-[430px]:inline">
