@@ -3,13 +3,29 @@
 from __future__ import annotations
 
 import logging
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from pydantic import BaseModel
 
-from api.services.config import ConfigurationError, get_settings
+# Vercel can load api/index.py as a standalone function module. Ensure both the
+# repository root and API directory are importable in that layout while keeping
+# ordinary package imports unchanged locally.
+_api_directory = Path(__file__).resolve().parent
+for _import_root in (_api_directory.parent, _api_directory, _api_directory / "api"):
+    _import_path = str(_import_root)
+    if _import_path not in sys.path:
+        sys.path.insert(0, _import_path)
+
+try:
+    from api.services.config import ConfigurationError, get_settings
+except ModuleNotFoundError as exc:
+    if exc.name not in {"api", "api.services"}:
+        raise
+    from services.config import ConfigurationError, get_settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -148,16 +164,30 @@ def monitor(
     # requests. This keeps health/config endpoints available during serverless
     # cold starts and turns binary dependency failures into diagnosable errors.
     try:
-        from api.services.raspberry_shake import (
-            SensorUnavailableError,
-            fetch_waveform,
-        )
-        from api.services.shm_analysis import assess_structure
-        from api.services.signal_processing import (
-            SignalProcessingError,
-            downsample_waveform,
-            process_acceleration,
-        )
+        try:
+            from api.services.raspberry_shake import (
+                SensorUnavailableError,
+                fetch_waveform,
+            )
+            from api.services.shm_analysis import assess_structure
+            from api.services.signal_processing import (
+                SignalProcessingError,
+                downsample_waveform,
+                process_acceleration,
+            )
+        except ModuleNotFoundError as exc:
+            if exc.name not in {"api", "api.services"}:
+                raise
+            from services.raspberry_shake import (
+                SensorUnavailableError,
+                fetch_waveform,
+            )
+            from services.shm_analysis import assess_structure
+            from services.signal_processing import (
+                SignalProcessingError,
+                downsample_waveform,
+                process_acceleration,
+            )
     except Exception as exc:
         logger.exception("Monitoring dependencies failed to load")
         raise HTTPException(

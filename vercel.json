@@ -3,7 +3,7 @@
   "functions": {
     "api/index.py": {
       "maxDuration": 60,
-      "includeFiles": "api/services/**",
+      "includeFiles": "api/**",
       "excludeFiles": "{tests/**,artifacts/**,.next/**,.next-dev/**}"
     }
   },
