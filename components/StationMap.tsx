@@ -88,14 +88,14 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
           className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
           aria-label={`${sensor.station} at ${sensor.latitude}, ${sensor.longitude}`}
         >
-          <span className="station-location-pulse absolute -inset-8 rounded-full border border-sky-300/45 bg-sky-300/[0.06]" />
-          <span className="station-location-pulse absolute -inset-4 rounded-full border border-sky-300/65 bg-sky-300/[0.08]" />
-          <span className="station-location-blink relative flex size-12 items-center justify-center rounded-full border-2 border-sky-100 bg-sky-400 text-slate-950 shadow-[0_0_30px_rgba(56,189,248,0.9)]">
-            <RadioTower className="size-6" aria-hidden="true" />
+          <span className="station-location-pulse absolute -inset-6 rounded-full border border-sky-300/45 bg-sky-300/[0.06]" />
+          <span className="station-location-pulse absolute -inset-3 rounded-full border border-sky-300/65 bg-sky-300/[0.08]" />
+          <span className="station-location-blink relative flex size-10 items-center justify-center rounded-full border-2 border-sky-100 bg-sky-400 text-slate-950 shadow-[0_0_24px_rgba(56,189,248,0.86)]">
+            <RadioTower className="size-5" aria-hidden="true" />
           </span>
-          <span className="absolute top-14 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-sky-300/25 bg-slate-950/90 px-3 py-2 text-center shadow-xl backdrop-blur">
-            <strong className="block font-mono text-xs text-sky-200">{sensor.station}</strong>
-            <span className="mt-0.5 block text-[10px] text-slate-400">Morong, Rizal</span>
+          <span className="absolute top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-sky-300/25 bg-slate-950/90 px-2.5 py-1.5 text-center shadow-xl backdrop-blur">
+            <strong className="block font-mono text-[11px] text-sky-200">{sensor.station}</strong>
+            <span className="mt-0.5 block text-[9px] text-slate-400">Morong, Rizal</span>
           </span>
         </div>
 
