@@ -40,7 +40,7 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
               Station Location
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-400">
-              Baras, Rizal · live geographic reference centered on RA909
+              Morong, Rizal · live geographic reference centered on RA909
             </p>
           </div>
         </div>
@@ -95,7 +95,7 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
           </span>
           <span className="absolute top-14 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-sky-300/25 bg-slate-950/90 px-3 py-2 text-center shadow-xl backdrop-blur">
             <strong className="block font-mono text-xs text-sky-200">{sensor.station}</strong>
-            <span className="mt-0.5 block text-[10px] text-slate-400">Baras, Rizal</span>
+            <span className="mt-0.5 block text-[10px] text-slate-400">Morong, Rizal</span>
           </span>
         </div>
 
@@ -112,7 +112,7 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
             <p className="text-[9px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
               Location
             </p>
-            <p className="mt-1 text-xs text-slate-300">Baras, Rizal, Philippines</p>
+            <p className="mt-1 text-xs text-slate-300">Morong, Rizal, Philippines</p>
           </div>
         </div>
       </div>
