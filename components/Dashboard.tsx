@@ -217,7 +217,7 @@ export function Dashboard() {
 
       <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         {!data && !error && <LoadingDashboard />}
-        {!data && error && <ErrorState message={error} onRetry={() => void loadReading()} />}
+        {!data && error && <ErrorState message={error} onRetry={() => window.location.reload()} />}
 
         {data && metrics && (
           <div className="space-y-4 sm:space-y-5">
