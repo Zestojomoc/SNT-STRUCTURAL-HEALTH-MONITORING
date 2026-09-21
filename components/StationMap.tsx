@@ -93,7 +93,7 @@ export function StationMap({ sensor }: { sensor: SensorInfo }) {
           <span className="station-location-blink relative flex size-10 items-center justify-center rounded-full border-2 border-sky-100 bg-sky-400 text-slate-950 shadow-[0_0_24px_rgba(56,189,248,0.86)]">
             <RadioTower className="size-5" aria-hidden="true" />
           </span>
-          <span className="absolute top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-sky-300/25 bg-slate-950/90 px-2.5 py-1.5 text-center shadow-xl backdrop-blur">
+          <span className="absolute bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-sky-300/25 bg-slate-950/90 px-2.5 py-1.5 text-center shadow-xl backdrop-blur sm:top-12 sm:bottom-auto">
             <strong className="block font-mono text-[11px] text-sky-200">{sensor.station}</strong>
             <span className="mt-0.5 block text-[9px] text-slate-400">Morong, Rizal</span>
           </span>
